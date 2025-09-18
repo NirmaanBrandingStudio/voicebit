@@ -7,14 +7,8 @@ import jay from "../assets/images/jay-patel-voicebit-cto.png";
 import jet from "../assets/images/growth-jet-icon.gif";
 import bulb from "../assets/images/innovation-idea-icon.gif";
 import useReveal from "../hooks/useReveal";
-import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
-import redlogo from "../assets/images/voicebit-brand-icon.png";
-
-// Simple sanitization function to remove HTML tags
-const sanitizeInput = (input) => {
-  return input.replace(/</g, "&lt;").replace(/>/g, "&gt;").trim();
-};
+import ContactForm from "./ContactForm";
 
 const AboutUs = () => {
   const [ref1, visible1] = useReveal();
@@ -25,198 +19,39 @@ const AboutUs = () => {
   const [ref6, visible6] = useReveal();
 
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-
-  // Form state
- const [formData, setFormData] = useState(() => {
-  const cached = localStorage.getItem("formData");
-  return cached
-    ? JSON.parse(cached)
-    : {
-        firstName: "",
-        lastName: "",
-        title: "",
-        email: "",
-        phone: "",
-        countryCode: "+1", // Default country code
-        restaurantName: "",
-        locationName: "",
-        website: "",
-        restaurantType: "",
-      };
-});
-
-  const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false); // New state for success message
   const [submitError, setSubmitError] = useState(""); // New state for API errors
 
   const openPopup = () => {
     setIsPopupOpen(true);
-    setIsSubmitted(false); // Reset on opening
-    setSubmitError(""); // Reset error on opening
+    setIsSubmitted(false);
+    setSubmitError("");
   };
 
   const closePopup = () => {
     setIsPopupOpen(false);
-    setFormData({
-      firstName: "",
-      lastName: "",
-      title: "",
-      email: "",
-      phone: "",
-      restaurantName: "",
-      locationName: "",
-      website: "",
-      restaurantType: "",
-    });
-    setErrors({});
-    setIsSubmitted(false); // Reset success state
-    setSubmitError(""); // Reset error state
   };
-
- 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    const sanitizedValue = sanitizeInput(value);
-    setFormData((prev) => {
-      const updated = { ...prev, [name]: sanitizedValue };
-      localStorage.setItem("formData", JSON.stringify(updated));
-      return updated;
-    });
-
-
-    // Real-time validation
-    const newErrors = { ...errors };
-    switch (name) {
-      case "firstName":
-      case "lastName":
-      case "title":
-        newErrors[name] =
-          value.trim() === ""
-            ? `${name.charAt(0).toUpperCase() + name.slice(1)} is required`
-            : "";
-        break;
-      case "email":
-        newErrors[name] = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(sanitizedValue)
-          ? "Invalid email format"
-          : "";
-        break;
-      case "website":
-        newErrors[name] =
-          sanitizedValue &&
-          !/^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/.test(
-            sanitizedValue
-          )
-            ? "Invalid website URL"
-            : "";
-        break;
-      case "restaurantType":
-        newErrors[name] = value === "" ? "Restaurant type is required" : "";
-        break;
-      default:
-        newErrors[name] = "";
-    }
-    setErrors(newErrors);
-  };
-
-
-const handlePhoneChange = (value, country) => {
-  // Get the country dial code (e.g., "91" for India)
-  const dialCode = country.dialCode || "91"; // Default to "91" if not detected
-  
-  // Split the value into country code and phone number
-  let phoneNumber = value;
-  
-  // If the value starts with the country code, extract just the phone number part
-  if (value.startsWith(dialCode)) {
-    phoneNumber = value.slice(dialCode.length);
-  }
-  
-  // Format the phone number with a space between country code and number
-  const formattedPhone = dialCode + " " + phoneNumber;
-  
-  setFormData((prev) => {
-    const updated = { 
-      ...prev, 
-      phone: phoneNumber, 
-      countryCode: `+${dialCode}`,
-      formattedPhone: formattedPhone // Optional: store formatted version if needed
-    };
-    localStorage.setItem("formData", JSON.stringify(updated));
-    return updated;
-  });
-
-  // Validate phone
-  const newErrors = { ...errors };
-  newErrors.phone =
-    !/^\d{10,}$/.test(phoneNumber) && phoneNumber !== ""
-      ? "Invalid phone number (at least 10 digits)"
-      : "";
-  setErrors(newErrors);
-};
-
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const newErrors = {};
-    if (!formData.firstName) newErrors.firstName = "First Name is required";
-    if (!formData.lastName) newErrors.lastName = "Last Name is required";
-    if (!formData.title) newErrors.title = "Title is required";
-    if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
-      newErrors.email = "Valid email is required";
-    if (!formData.phone || !/^\d{10,}$/.test(formData.phone))
-      newErrors.phone = "Valid phone number is required";
-
-
-    if (Object.keys(newErrors).length === 0) {
-      try {
-        const response = await fetch(
-          "https://api-dev.voicebit.ai/api/v1/inquiries/inquiry",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(formData),
-          }
-        );
-
-
-        if (response.ok) {
-          setIsSubmitted(true);
-          setSubmitError("");
-          localStorage.removeItem("formData"); // clear cache after submit
-        } else {
-          const errorData = await response.json();
-          setSubmitError(
-            errorData.message || "Failed to submit the form. Please try again."
-          );
-        }
-      } catch (error) {
-        setSubmitError("An error occurred. Please try again later.");
-      }
-    } else {
-      setErrors(newErrors);
-    }
-  };
 
   useEffect(() => {
-  document.title = "About Us | Redefining Restaurant Calls";
+    document.title = "About Us | Redefining Restaurant Calls";
 
-  const description = document.createElement("meta");
-  description.name = "description";
-  description.content =
-    "Discover VoiceBit’s mission to help restaurants reclaim their customer relationships. Learn how our AI-powered call assistant boosts reliability, empathy, accountability, and innovation.";
-  document.head.appendChild(description);
+    const description = document.createElement("meta");
+    description.name = "description";
+    description.content =
+      "Discover VoiceBit’s mission to help restaurants reclaim their customer relationships. Learn how our AI-powered call assistant boosts reliability, empathy, accountability, and innovation.";
+    document.head.appendChild(description);
 
-  const keywords = document.createElement("meta");
-  keywords.name = "keywords";
-  keywords.content =
-    "about VoiceBit, restaurant call automation, AI call assistant, restaurant customer relationships, call reliability, innovation in restaurants";
-  document.head.appendChild(keywords);
+    const keywords = document.createElement("meta");
+    keywords.name = "keywords";
+    keywords.content =
+      "about VoiceBit, restaurant call automation, AI call assistant, restaurant customer relationships, call reliability, innovation in restaurants";
+    document.head.appendChild(keywords);
 
-  return () => {
-    document.head.removeChild(description);
-    document.head.removeChild(keywords);
-  };
-}, []);
+    return () => {
+      document.head.removeChild(description);
+      document.head.removeChild(keywords);
+    };
+  }, []);
 
   return (
     <div>
@@ -232,7 +67,10 @@ const handlePhoneChange = (value, country) => {
             <h1>About Us</h1>
             <div className="mission-section">
               <div className="mission">
-                <img src={jet} alt="Jet icon symbolizing business growth with Voicebit AI voice ordering" />
+                <img
+                  src={jet}
+                  alt="Jet icon symbolizing business growth with Voicebit AI voice ordering"
+                />
                 <h2>
                   Our <br /> Mission
                 </h2>
@@ -252,7 +90,10 @@ const handlePhoneChange = (value, country) => {
           className={`why-started-section reveal ${visible2 ? "visible" : ""}`}
         >
           <div className="why-started-content">
-            <img src={bulb} alt="Innovation bulb icon representing Voicebit’s AI-powered solutions" />
+            <img
+              src={bulb}
+              alt="Innovation bulb icon representing Voicebit’s AI-powered solutions"
+            />
 
             <div className="why-started-texts">
               <p className="why-started-text">
@@ -282,7 +123,11 @@ const handlePhoneChange = (value, country) => {
         >
           <div className="skydeck-card">
             <p className="skydeck-text">Backed by</p>
-            <img src={bsky} alt="Voicebit featured in Berkeley SkyDeck accelerator program" className="skydeck-logo" />
+            <img
+              src={bsky}
+              alt="Voicebit featured in Berkeley SkyDeck accelerator program"
+              className="skydeck-logo"
+            />
             <p className="skydeck-text">
               We're proud to be backed by Berkeley SkyDeck, one of the top
               university-affiliated startup accelerators in the U.S.
@@ -405,7 +250,10 @@ const handlePhoneChange = (value, country) => {
           <h2>Meet the Team</h2>
           <div className="team-card-container">
             <div className="team-card">
-              <img src={hitesh} alt="Hitesh Kenjale – CEO of Voicebit, AI-driven restaurant solutions leader" />
+              <img
+                src={hitesh}
+                alt="Hitesh Kenjale – CEO of Voicebit, AI-driven restaurant solutions leader"
+              />
               <div style={{ display: "flex", flexDirection: "column" }}>
                 <h3>Hitesh Kenjale</h3>
                 <span className="team-position"> CEO</span>
@@ -420,7 +268,10 @@ const handlePhoneChange = (value, country) => {
               </p>
             </div>
             <div className="team-card">
-              <img src={lovre} alt="Lovre Soric – COO of Voicebit, restaurant operations and strategy expert" />
+              <img
+                src={lovre}
+                alt="Lovre Soric – COO of Voicebit, restaurant operations and strategy expert"
+              />
               <div style={{ display: "flex", flexDirection: "column" }}>
                 <h3>Lovre Soric </h3>
                 <span className="team-position"> COO</span>
@@ -433,7 +284,10 @@ const handlePhoneChange = (value, country) => {
               </p>
             </div>
             <div className="team-card">
-              <img src={jay} alt="Jay Patel – CTO of Voicebit, AI/ML expert and product architect" />
+              <img
+                src={jay}
+                alt="Jay Patel – CTO of Voicebit, AI/ML expert and product architect"
+              />
               <div style={{ display: "flex", flexDirection: "column" }}>
                 <h3>Jay Patel</h3>
                 <span className="team-position"> CTO</span>
@@ -462,150 +316,17 @@ const handlePhoneChange = (value, country) => {
             </button>
           </div>
         </div>
-       {isPopupOpen && (
-        <div className="popup-overlay">
-          <div className="popup-content" onClick={(e) => e.stopPropagation()}>
-            <div className="popup-header">
-              <button className="close-button" onClick={closePopup}>
-                ×
-              </button>
-              <img src={redlogo} alt="VoiceBit Logo" className="form-logo" />
-            </div>
-
-
-            <div className={`popup-body ${isSubmitted ? "success-mode" : ""}`}>
-              {!isSubmitted ? (
-                <>
-                  <h2 className="form-title">Get In Touch with VoiceBit</h2>
-                  <p className="form-description">
-                    Want to see how VoiceBit can simplify phone orders for your
-                    restaurant? Fill out this quick form and our team will reach
-                    out shortly.
-                  </p>
-
-
-                  <form onSubmit={handleSubmit}>
-                    <h3 className="form-subtitle">Contact Info</h3>
-
-
-                    <div className="form-group">
-                      <input
-                        type="text"
-                        name="firstName"
-                        placeholder="First Name"
-                        value={formData.firstName}
-                        onChange={handleChange}
-                        required
-                      />
-                      {errors.firstName && (
-                        <span className="error">{errors.firstName}</span>
-                      )}
-                    </div>
-                    <div className="form-group">
-                      <input
-                        type="text"
-                        name="lastName"
-                        placeholder="Last Name"
-                        value={formData.lastName}
-                        onChange={handleChange}
-                        required
-                      />
-                      {errors.lastName && (
-                        <span className="error">{errors.lastName}</span>
-                      )}
-                    </div>
-                    <div className="form-group">
-                      <input
-                        type="text"
-                        name="title"
-                        placeholder="Title (e.g., Owner, Manager)"
-                        value={formData.title}
-                        onChange={handleChange}
-                        required
-                      />
-                      {errors.title && (
-                        <span className="error">{errors.title}</span>
-                      )}
-                    </div>
-                    <div className="form-group">
-                      <input
-                        type="email"
-                        name="email"
-                        placeholder="Email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                      />
-                      {errors.email && (
-                        <span className="error">{errors.email}</span>
-                      )}
-                    </div>
-
-
-                    <div className="form-group">
-                     <PhoneInput country={"us"}  onChange={handlePhoneChange} inputProps={{ name: "phone", required: true, }} disableCountryCode={false}  autoFormat={false}  />
-                      {errors.phone && (
-                        <span className="error">{errors.phone}</span>
-                      )}
-                    </div>
-
-
-                    <h3 className="form-subtitle">
-                      Business Information (Optional)
-                    </h3>
-                    <div className="form-group">
-                      <input
-                        type="text"
-                        name="restaurantName"
-                        placeholder="Restaurant and Business Name"
-                        value={formData.restaurantName}
-                        onChange={handleChange}
-                      />
-                      {errors.restaurantName && (
-                        <span className="error">{errors.restaurantName}</span>
-                      )}
-                    </div>
-                    <div className="form-group">
-                      <input
-                        type="url"
-                        name="website"
-                        placeholder="Website"
-                        value={formData.website}
-                        onChange={handleChange}
-                      />
-                      {errors.website && (
-                        <span className="error">{errors.website}</span>
-                      )}
-                    </div>
-
-
-                    <button type="submit" className="submit-button">
-                      Submit
-                    </button>
-                    {submitError && (
-                      <span className="error">{submitError}</span>
-                    )}
-                  </form>
-                </>
-              ) : (
-                <div className="success-message">
-                  <h2 className="form-title">Thank You!</h2>
-                  <p className="form-description">
-                    Your request has been received successfully.
-                  </p>
-                  <p className="form-description">
-                    Our team will connect with you shortly to assist you
-                    further.
-                  </p>
-                  <button className="close-btn" onClick={closePopup}>
-                    Close
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+         
+        {isPopupOpen && (
+          <ContactForm
+            isOpen={isPopupOpen}
+            onClose={closePopup}
+            onSubmitSuccess={() => {
+              setIsSubmitted(true);
+              setSubmitError("");
+            }}
+          />
+        )}
       </section>
     </div>
   );
