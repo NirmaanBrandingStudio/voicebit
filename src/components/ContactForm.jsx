@@ -197,7 +197,7 @@ const ContactForm = ({ isOpen, onClose, onSubmitSuccess }) => {
                   <div className="form-group">
                     <input
                       type="email"
-                      name="email "
+                      name="email"
                       placeholder="Email *"
                       value={formData.email}
                       onChange={handleChange}
@@ -209,7 +209,7 @@ const ContactForm = ({ isOpen, onClose, onSubmitSuccess }) => {
                     <PhoneInput
                       country={"us"}
                       onChange={handlePhoneChange}
-                      inputProps={{ name: "phone *", required: true }}
+                      inputProps={{ name: "phone", required: true, placeholder: "Phone *" }}
                       disableCountryCode={false}
                       autoFormat={false}
                     />
@@ -227,7 +227,7 @@ const ContactForm = ({ isOpen, onClose, onSubmitSuccess }) => {
                   </div>
                   <div className="form-group">
                     <input
-                      type="text" // Changed from "url" to "text"
+                      type="text"
                       name="website"
                       placeholder="Website"
                       value={formData.website}
